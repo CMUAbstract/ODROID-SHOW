@@ -131,6 +131,8 @@ void initPins()
 	pinMode(A0, INPUT);
 	pinMode(A1, INPUT);
 
+  analogReference(INTERNAL);
+
 	analogWrite(ledPin, pwm);
 }
 
@@ -278,7 +280,21 @@ void loop(void)
         }
 
         if (statusUpdateFlag) {
-                // Update status line here
+                int32_t Vbat = analogRead(A3);
+                int Vbat_prc = (Vbat - 854) * 100 / 115; // 115 = (4.2-3.7) * 3.3/(10+3.3) / 1.1 * 1024; 854 = 3.7 * 3.3/(10+3.3) / 1.1 * 1024
+                Vbat = (Vbat * 1100) / 1024 * 133 / 33; // mV (Vref = 1100 mV), divider 10k:3.3k
+                char Vbat_str[32] = {0};
+                int Vbat_len = sprintf(Vbat_str, "BAT: %umV", Vbat);
+                Vbat_len += sprintf(Vbat_str + Vbat_len, " (%u%%)", Vbat_prc); // printing both in one call doesn't work
+
+                int cur_x = tft.cursor_x;
+                int cur_y = tft.cursor_y;
+                tft.fillRect(0, 0, right_edge0, STATUS_LINE_HEIGHT_PX, ILI9340_BLACK);
+                tft.setCursor(0, 0);
+                for (int i = 0; i < Vbat_len; i++)
+                    tft.print(Vbat_str[i]);
+                tft.setCursor(cur_x, cur_y);
+
                 statusUpdateFlag = 0;
         }
 }
