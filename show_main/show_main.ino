@@ -281,7 +281,9 @@ void loop(void)
 
         if (statusUpdateFlag) {
                 int32_t Vbat = analogRead(A3);
-                int Vbat_prc = (Vbat - 854) * 100 / 115; // 115 = (4.2-3.7) * 3.3/(10+3.3) / 1.1 * 1024; 854 = 3.7 * 3.3/(10+3.3) / 1.1 * 1024
+                #define VBAT_MIN 854  // 3.7V * 3.3/(10+3.3) / 1.1 * 1024
+                int Vbat_delta = Vbat > VBAT_MIN ? Vbat - VBAT_MIN : 0;
+                int Vbat_prc = Vbat_delta * 100 / 115; // 115 = (4.2V-3.7V) * 3.3k/(10k+3.3k) / 1.1 * 1024;
                 Vbat = (Vbat * 1100) / 1024 * 133 / 33; // mV (Vref = 1100 mV), divider 10k:3.3k
                 char Vbat_str[32] = {0};
                 int Vbat_len = sprintf(Vbat_str, "BAT: %umV", Vbat);
