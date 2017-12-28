@@ -39,6 +39,8 @@
 #define TOP_EDGE0              0
 #define BOTTOM_EDGE240         239
 
+#define STATUS_LINE_HEIGHT_PX 16
+
 #define SERIAL_RX_BUFFER_SIZE 64
 
 volatile uint8_t _rx_buffer_head = 0;
@@ -49,6 +51,7 @@ uint8_t lengthFlag = 0;
 uint8_t ackFlag = 0;
 uint8_t readFlag = 0;
 uint8_t strcnt = 0;
+volatile uint8_t statusUpdateFlag = 0;
 
 
 const char version[] = "v2.0";
@@ -65,6 +68,7 @@ cursor startImage, endImage;
 
 uint32_t imgDelay = 0;
 uint32_t serialDelay = 0;
+uint16_t statusDelay = 0;
 uint8_t c;
 uint8_t ch;
 
@@ -157,6 +161,7 @@ void timerCallback()
 {
         imgDelay++;
 	serialDelay++;
+        statusDelay++;
         readBtn();
 
 	if (serialDelay > 20) {
@@ -171,6 +176,10 @@ void timerCallback()
 			lengthFlag = 0;
 		}
 	}
+  if (statusDelay > 100) {
+    statusUpdateFlag = 1;
+    statusDelay = 0;
+  }
 }
 
 unsigned char btn0Presses = 0;
@@ -266,6 +275,11 @@ void loop(void)
 			if (parsechar(c) > 0)
                         	tft.print((char)c);
                 }
+        }
+
+        if (statusUpdateFlag) {
+                // Update status line here
+                statusUpdateFlag = 0;
         }
 }
 
@@ -404,7 +418,7 @@ int parsechar(unsigned char current_char)
                                 break;
 
                         case 'H':        // Cursor to Home
-                                tft.setCursor(0, 0);
+                                tft.setCursor(0, STATUS_LINE_HEIGHT_PX);
                                 break;
 
                         case 's':        // Save cursor pos
@@ -451,7 +465,7 @@ int parsechar(unsigned char current_char)
                         case 'f':        // ditto
                                 tmpnum = (tmpnum > 0) ? tmpnum - 1 : 0;
                                 col = (tmpnum > bottom_edge0) ? bottom_edge0 : tmpnum;
-                                tft.setCursor(tft.cursor_x = row, tft.cursor_y = col);
+                                tft.setCursor(tft.cursor_x = row, tft.cursor_y = STATUS_LINE_HEIGHT_PX + col);
                                 break;
 
                         case 'A':
@@ -510,7 +524,7 @@ int parsechar(unsigned char current_char)
                         case 'J':
                                 if (tmpnum == 2) {
                                         tft.fillScreen(ILI9340_BLACK);
-                                        tft.setCursor(0, 0);
+                                        tft.setCursor(0, STATUS_LINE_HEIGHT_PX);
                                 }
                                 break;
 
