@@ -205,6 +205,8 @@ void readBtn()
         }
 
         if (digitalRead(A1) && (btn2Releases == 0)) {
+                if (btn2Pushed)
+                    Serial.println("BTN:2");
                 btn2Releases = 1;
                 btn2Presses = 0;
                 btn2Pushed = 0;
@@ -224,6 +226,8 @@ void readBtn()
         }
 
         if (digitalRead(7) && (btn0Releases == 0)) {
+                if (btn0Pushed)
+                    Serial.println("BTN:0");
                 btn0Releases = 1;
                 btn0Presses = 0;
                 btn0Pushed = 0;
@@ -243,6 +247,8 @@ void readBtn()
         }
 
         if (digitalRead(A0) && (btn1Releases == 0)) {
+                if (btn1Pushed)
+                    Serial.println("BTN:1");
                 btn1Releases = 1;
                 btn1Presses = 0;
                 btn1Pushed = 0;
